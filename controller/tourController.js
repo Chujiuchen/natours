@@ -1,7 +1,7 @@
 // const fs = require('fs');
 // const tours = JSON.parse(fs.readFileSync(`${__dirname}/../dev-data/data/tours-simple.json`));
 const Tour = require('./../models/tourModel');
-
+const APIFeatures = require('./../utils/apiFeatures')
 // exports.checkId = (req, res, next, val) => {
 // 	console.log(`Tour id is ${val}`);
 // 	if (req.params.id * 1 > tours.length - 1) {
@@ -32,51 +32,8 @@ exports.aliasTopTours = (req,res,next) =>{
 
 exports.getAllTours = async (req, res) => {
 	try {
-		//build query
-		const queryObj = { ...req.query };
-		const excludedFields = ['page', 'sort', 'limit', 'fields'];
-		excludedFields.forEach(el => delete queryObj[el]);
-
-		// console.log(queryObj);
-		let queryStr = JSON.stringify(queryObj);
-		queryStr = JSON.parse(queryStr.replace(/\b(gte|gt|lt|lte)\b/g, match => `$${match}`));
-		// console.log((JSON.parse(queryStr)));
-
-		let query = Tour.find(queryStr);
-		//sort
-		if (req.query.sort) {
-			const sortBy = req.query.sort.split(',').join(' ');
-			// console.log(sortBy);
-			query = query.sort(sortBy);
-		} else {
-			query = query.sort('-createAt');
-		}
-
-		//field
-		if (req.query.fields) {
-			const fields = req.query.fields.split(',').join(' ');
-			query = query.select(fields);
-		} else {
-			query = query.select('-__v');
-		}
-
-		//pagination
-		let page = req.query.page * 1 || 1;//page 多少页
-		const limit = req.query.limit * 1 || 100;//limit 限制显示多少
-		//计算出有多少条数据 算出最大是多少页
-		const countDocuments = await Tour.countDocuments();//获取最大数据
-		// console.log(countDocuments);
-		const maxPages = Math.ceil(countDocuments / limit);
-		// console.log(maxPages);
-		// console.log(page)
-		if (page > maxPages) {
-			page = maxPages;
-		}
-		const skip = (page - 1) * limit;
-		query = query.skip(skip).limit(limit);
-		//execute query
-		const tours = await query;
-
+		const features = new APIFeatures(Tour.find(),req.query).filter().sort().limitFields().pagination();
+		const tours = await features.query;
 		//send response
 		res.status(200).json({
 			status: 'success',
