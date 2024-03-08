@@ -53,6 +53,20 @@ exports.getAllTours = async (req, res) => {
 			query = query.select('-__v');
 		}
 
+		//pagination
+		let page = req.query.page * 1 || 1;//page 多少页
+		const limit = req.query.limit * 1 || 100;//limit 限制显示多少
+		//计算出有多少条数据 算出最大是多少页
+		const countDocuments = await Tour.countDocuments();//获取最大数据
+		// console.log(countDocuments);
+		const maxPages = Math.ceil(countDocuments / limit);
+		// console.log(maxPages);
+		// console.log(page)
+		if(page > maxPages) {
+			page = maxPages;
+		}
+		const skip = (page - 1) * limit;
+		query = query.skip(skip).limit(limit);
 		//execute query
 		const tours = await query;
 
