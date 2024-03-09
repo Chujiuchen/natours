@@ -32,6 +32,10 @@ const tourSchema = mongoose.Schema({
 			required: [true, 'A tour must have a price!']
 		},
 		priceDiscount: Number,
+		secretTour: {
+			type: Boolean,
+			default: false
+		},
 		summary: {
 			type: String,
 			trim: true
@@ -66,6 +70,19 @@ tourSchema.pre('save', function(next) {
 	this.slug = slugify(this.name, { lower: true });
 	next();
 });
+
+//查询前限制 secretTour = true 的全部不显示  等同于vip内容
+tourSchema.pre(/^find/, function(next) {
+	this.find({ secretTour: { $ne: true } });
+	this.start = Date.now();
+	next();
+});
+
+tourSchema.post(/^find/,function(docs, next) {
+	console.log(`Query took ${Date.now() - this.start } milliseconds`);
+	next();
+})
+
 
 // tourSchema.pre('save', function(next) {
 // 	console.log('Will save document...')
