@@ -1,3 +1,4 @@
+//自定义的错误处理中间键
 module.exports = (err, req, res, next) => {
 	err.statusCode = err.statusCode || 500;
 	err.status = err.status || 'error';

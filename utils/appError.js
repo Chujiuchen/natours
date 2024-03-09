@@ -1,3 +1,4 @@
+//url 错误处理的中间键
 class AppError extends Error {
 	constructor(message, statusCode) {
 		super(message);//传进来什么信息就是什么
@@ -5,7 +6,7 @@ class AppError extends Error {
 		this.status = `${statusCode}`.startsWith('4') ? 'fail' : 'error';
 		this.isOperational = true;//设置这个状态永远是true
 		Error.captureStackTrace(this, this.constructor);
-		console.log(55555555);
+		// console.log(55555555);
 	}
 }
 

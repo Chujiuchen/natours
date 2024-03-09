@@ -1,3 +1,4 @@
+//api处理数据的中间键
 class APIFeatures{
 	constructor(query,queryString){
 		this.query = query;
