@@ -40,7 +40,16 @@ const tourSchema = mongoose.Schema({
 			type: Number,
 			required: [true, 'A tour must have a price!']
 		},
-		priceDiscount: Number,
+		priceDiscount: {
+			type:Number,
+			validate:{
+				validator: function(val) {
+					//this 只能指向新创建的Tour 所以updata数据不能生效这个验证规则
+					return val < this.price;
+				},
+				message:'Discount price {VALUE} should be below regular price!',
+			}
+		},
 		secretTour: {
 			type: Boolean,
 			default: false
