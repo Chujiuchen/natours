@@ -3,8 +3,11 @@ const slugify = require('slugify');
 const tourSchema = mongoose.Schema({
 		name: {
 			type: String,
-			required: [true, 'A tour must hava a name!'],
-			unique: true
+			required: [true, 'A tour must hava a name!'],//不为空
+			unique: true,
+			trim: true,
+			maxlength: [40, 'A tour name must have less or equal then 40 characters'],//最大长度
+			minlength: [6, 'A tour name must have more or equal then 10 characters']//最小长度
 		},
 		slug: String,
 		duration: {
@@ -17,11 +20,17 @@ const tourSchema = mongoose.Schema({
 		},
 		difficulty: {
 			type: String,
-			required: [true, 'A tour must have difficulty!']
+			required: [true, 'A tour must have difficulty!'],
+			enum: {
+				values: ['easy', 'medium', 'difficult'],//枚举限制
+				message: 'Difficulty is either:easy,medium,difficult!'//err信息显示
+			}
 		},
 		ratingsAverage: {
 			type: Number,
-			default: 4.5
+			default: 4.5,//默认值
+			min: [1, 'Rating must be above 1.0!'],//最大值
+			max: [5, 'Rating must be below 5.0!']//最小值
 		},
 		ratingsQuantity: {
 			type: Number,
@@ -85,9 +94,9 @@ tourSchema.post(/^find/, function(docs, next) {
 
 // 聚合函数查询的数据 没有提前过滤条件 这个就是在聚合函数查询前 添加一个条件到聚合函数中在进行next
 tourSchema.pre('aggregate', function(next) {
-	this.pipeline().unshift({ $match: { secretTour: { $ne: true } }});
+	this.pipeline().unshift({ $match: { secretTour: { $ne: true } } });
 	next();
-})
+});
 
 // tourSchema.pre('save', function(next) {
 // 	console.log('Will save document...')
@@ -98,6 +107,7 @@ tourSchema.pre('aggregate', function(next) {
 // 	next();
 // })
 
-	const Tour = mongoose.model('Tour', tourSchema);
+const Tour = mongoose.model('Tour', tourSchema);
 
-	module.exports = Tour;;
+module.exports = Tour;
+;
