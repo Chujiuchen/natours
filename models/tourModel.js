@@ -78,11 +78,16 @@ tourSchema.pre(/^find/, function(next) {
 	next();
 });
 
-tourSchema.post(/^find/,function(docs, next) {
-	console.log(`Query took ${Date.now() - this.start } milliseconds`);
+tourSchema.post(/^find/, function(docs, next) {
+	console.log(`Query took ${Date.now() - this.start} milliseconds`);
+	next();
+});
+
+// 聚合函数查询的数据 没有提前过滤条件 这个就是在聚合函数查询前 添加一个条件到聚合函数中在进行next
+tourSchema.pre('aggregate', function(next) {
+	this.pipeline().unshift({ $match: { secretTour: { $ne: true } }});
 	next();
 })
-
 
 // tourSchema.pre('save', function(next) {
 // 	console.log('Will save document...')
@@ -93,6 +98,6 @@ tourSchema.post(/^find/,function(docs, next) {
 // 	next();
 // })
 
-const Tour = mongoose.model('Tour', tourSchema);
+	const Tour = mongoose.model('Tour', tourSchema);
 
-module.exports = Tour;
+	module.exports = Tour;;
