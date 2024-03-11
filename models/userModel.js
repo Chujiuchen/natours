@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const crypto = require('crypto');
 const validator = require('validator');
 const bcrypt = require('bcryptjs');
 
@@ -15,10 +16,10 @@ const userSchema = mongoose.Schema({
 		validate: [validator.isEmail, 'Please provide a valid email!']
 	},
 	photo: String,
-	role:{
-		type:String,
-		enum:['user','guide','lead-guide','admin'],
-		default:'user'
+	role: {
+		type: String,
+		enum: ['user', 'guide', 'lead-guide', 'admin'],
+		default: 'user'
 	},
 	password: {
 		type: String,
@@ -30,7 +31,9 @@ const userSchema = mongoose.Schema({
 		type: String,
 		required: [true, 'Please confirm your password!']
 	},
-	passwordChangeAt: Date
+	passwordChangeAt: Date,
+	passwordResetToken: String,
+	passwordResetExpires: Date
 });
 
 userSchema.pre('save', async function(next) {
@@ -56,8 +59,17 @@ userSchema.methods.changedPasswordAfter = function(JWTTimestamp) {
 	return false;
 };
 
-
-
+//创建忘记密码和充值密码的 token
+userSchema.methods.createPasswordResetToken = function() {
+	//创建一个随机的字符串
+	const resetToken = crypto.randomBytes(32).toString('hex');
+	//创建忘记密码的token
+	this.passwordResetToken = crypto.createHash('sha256').update(resetToken).digest('hex');
+	console.log({ resetToken }, this.passwordResetToken);
+	//创建时效 10分钟
+	this.passwordResetExpires = Date.now() + 10 * 60 * 1000;
+	return resetToken;
+};
 
 
 const User = mongoose.model('User', userSchema);

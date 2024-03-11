@@ -103,3 +103,18 @@ exports.restrictTo = (...roles) => {
 		next();
 	};
 };
+
+//忘记密码的验证
+exports.forgotPassword = catchAsync(async (req, res, next) => {
+	//获取用户的邮箱
+	const user = await User.findOne({ email: req.body.email });
+	if (!user) {
+		return next(new AppError('There is no user with email address!', 404));
+	}
+	//获取随机的reset token
+	const resetToken = user.createPasswordResetToken();
+	await user.save({ validateBeforeSave: false });
+});
+
+
+
