@@ -2,7 +2,9 @@ const User = require('./../models/userModel');
 const { promisify } = require('util');
 const catchAsync = require('./../utils/catchAsync');
 const jwt = require('jsonwebtoken');
+const sendEmail = require('./../utils/email.js');
 const AppError = require('./../utils/appError');
+
 
 //生产jwt令牌的函数通过 传id 然后把令牌return
 const signToken = id => {
@@ -114,6 +116,29 @@ exports.forgotPassword = catchAsync(async (req, res, next) => {
 	//获取随机的reset token
 	const resetToken = user.createPasswordResetToken();
 	await user.save({ validateBeforeSave: false });
+	//发送邮件
+	const resetURL = `${req.protocol}://${req.get('host')}/api/v1/users/resetPassword/${resetToken}`;//整合个充值密码的url
+	const message = `Forgot your password? Submit a PATCH request with your new password and passwordConfirm to: ${resetURL}.\nIf you didn't forget your password, please ignore this email!`;
+	try {
+		//调用发送邮件的中间件
+		await sendEmail({
+			email: user.email,//当前用户的邮箱
+			subject: 'You password reset token (valid 10 min)',
+			message//提示信息 和 集合了token的url
+		});
+		res.status(200).json({
+			status: 'success',
+			message: 'Token send to email!'
+		});
+	} catch (err) {
+		//如果出现错误就把 标记清空
+		user.passwordResetToken = undefined;
+		user.passwordResetExpires = undefined;
+		//然后保存
+		await user.save({ validateBeforeSave: false });
+		//返回个错误提示
+		return next(new AppError('There was an error sending the email!Try again later!', 500));
+	}
 });
 
 
