@@ -1,23 +1,28 @@
 //自定义的错误处理中间键
-const AppError = require('./../utils/appError')
+const AppError = require('./../utils/appError');
 
-const handleCaseErrorDB = err =>{
-	const message = `Invalid ${err.path}: ${err.value}...`
-	return new AppError(message,400);
-}
+const handleCaseErrorDB = err => {
+	const message = `Invalid ${err.path}: ${err.value}...`;
+	return new AppError(message, 400);
+};
 
-const handleDuplicateFieldDB = err =>{
+const handleDuplicateFieldDB = err => {
 	const value = err.errmsg.match(/"(.*?)"/g)[0];
-	const message = `Duplicate field value ${value}: Please use another value!`
-	return new AppError(message,400);
-}
+	const message = `Duplicate field value ${value}: Please use another value!`;
+	return new AppError(message, 400);
+};
 
-const handleValidationErrorDB = err =>{
-	const errors = Object.values(err.errors).map(el =>el.message);
+const handleValidationErrorDB = err => {
+	const errors = Object.values(err.errors).map(el => el.message);
+	const message = `Invalid input data. ${errors.join('. ')}`;
+	return new AppError(message, 400);
+};
 
-	const message  = `Invalid input data. ${errors.join('. ')}`;
-	return new AppError(message,400);
-}
+//jwt token 错误的处理中间件
+const handleJWTError = () => new AppError('Invalid token. Please log in again!', 401);
+
+//jwt 过期 错误处理
+const handleJWTExpiredError = () => new AppError('Your token has expired. Please log in again!', 401);
 
 const sendErrorDev = (err, res) => {
 	//开发环境下的错误显示
@@ -28,7 +33,7 @@ const sendErrorDev = (err, res) => {
 		stack: err.stack
 	});
 };
-
+//标准的错误处理
 const sendErrorProd = (err, res) => {
 	//生产环境下的错误显示
 	if (err.isOperational) {
@@ -37,7 +42,7 @@ const sendErrorProd = (err, res) => {
 			message: err.message
 		});
 	} else {
-		console.error('Error:',err);
+		console.error('Error:', err);
 		res.status(500).json({
 			status: 'error',
 			message: 'Something was wrong!'
@@ -60,17 +65,21 @@ module.exports = (err, req, res, next) => {
 		// console.log(err.statusCode)
 		// console.log(error.name);
 		// console.log(111)
-		if(error.name === 'CastError'){
+		if (error.name === 'CastError') {
 			error = handleCaseErrorDB(error);
 		}
-		if(error.code === 11000){
+		if (error.code === 11000) {
 			error = handleDuplicateFieldDB(error);
 		}
-		if (error.name === 'ValidationError'){
+		if (error.name === 'ValidationError') {
 			error = handleValidationErrorDB(error);
 		}
-
+		if (error.name === 'JsonWebTokenError') {
+			error = handleJWTError();
+		}
+		if (error.name === 'TokenExpiredError') {
+			error = handleJWTExpiredError();
+		}
 		sendErrorProd(error, res);
 	}
-
 };
