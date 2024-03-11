@@ -14,12 +14,14 @@ exports.signup = catchAsync(async (req, res, next) => {
 		name: req.body.name,
 		email: req.body.email,
 		password: req.body.password,
-		passwordConfirm: req.body.passwordConfirm
+		passwordConfirm: req.body.passwordConfirm,
+		role: req.body.role
 	});
 	// console.log(newUser);
 
 	//create jwt token
 	const token = signToken(newUser._id);
+	console.log(req.body.role);
 	//发送到客户端
 	res.status(201).json({
 		status: 'success',
@@ -77,16 +79,27 @@ exports.protect = catchAsync(async (req, res, next) => {
 
 	//3) 检查用户是否还存在
 	const currentUser = await User.findById(decoded.id);
-	if (!currentUser){
-		return next(new AppError('The user belonging to this token does no longer exist.',401))
+	if (!currentUser) {
+		return next(new AppError('The user belonging to this token does no longer exist.', 401));
 	}
 
 	//4) Check user changed password after the token was issued
-	if (currentUser.changedPasswordAfter(decoded.iat)){
-		return next(new AppError('User recently changed password!Please log in again!',401));
+	if (currentUser.changedPasswordAfter(decoded.iat)) {
+		return next(new AppError('User recently changed password!Please log in again!', 401));
 	}
 
 	req.user = currentUser;
 	next();
 });
 
+exports.restrictTo = (...roles) => {
+	return (req, res, next) => {
+		//判断设置的全选 和用户所有的权限是否一直
+		if (!roles.includes(req.user.role)) {
+			//不一致就提示错误
+			return next(new AppError('You do not have permission to perform this action', 401));
+		}
+		//一致就放行
+		next();
+	};
+};
