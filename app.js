@@ -4,6 +4,7 @@ const rateLimit = require('express-rate-limit');
 const helmet = require('helmet');
 const mongoSanitize = require('express-mongo-sanitize');
 const xss = require('xss-clean');
+const hpp = require('hpp');
 
 const AppError = require('./utils/appError');
 const globalErrorHandler = require('./controller/errorController');
@@ -35,6 +36,11 @@ app.use(express.json({
 app.use(mongoSanitize());
 //XSS 这个将去除如何用户输入的html代码
 app.use(xss());
+//hpp 防止HTTP参数污染
+app.use(hpp({
+	whitelist: ['ratingsAverage', 'ratingsQuantity', 'duration', 'maxGroupSize', 'difficulty', 'price']
+}));
+
 //express能读取到public文件中的所有文件
 app.use(express.static(`${__dirname}/public`));
 
