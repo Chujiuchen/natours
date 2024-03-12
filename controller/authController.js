@@ -5,7 +5,6 @@ const jwt = require('jsonwebtoken');
 const sendEmail = require('./../utils/email.js');
 const AppError = require('./../utils/appError');
 const crypto = require('crypto');
-const bcrypt = require('bcryptjs');
 
 //生产jwt令牌的函数通过 传id 然后把令牌return
 const signToken = id => {
@@ -78,7 +77,7 @@ exports.protect = catchAsync(async (req, res, next) => {
 	if (!token) {
 		return new AppError('You are not logged in!Please log in to get access.', 401);
 	}
-// console.log(111)
+// console.log(111222)
 
 	//2) 验证登录的jwt token
 	const decoded = await promisify(jwt.verify)(token, process.env.JWT_SECRECT);
