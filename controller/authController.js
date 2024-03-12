@@ -14,6 +14,15 @@ const signToken = id => {
 //create jwt token
 const createSendToken = (user, statusCode, res) => {
 	const token = signToken(user._id);
+	const cookieOptions = {
+		expires: new Date(Date.now() + process.env.JWT_COOKIE_EXPIRES_IN * 24 * 60 * 60 * 1000),
+		httpOnly: true
+	};
+	if (process.env.NODE_ENV === 'production') cookieOptions.secure = true;
+	//发送cookie到客户端 res
+	res.cookie('jwt', token, cookieOptions);
+	//把密码隐藏不显示
+	user.password = undefined;
 	//发送到客户端
 	res.status(statusCode).json({
 		status: 'success',
