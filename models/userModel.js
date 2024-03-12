@@ -29,7 +29,13 @@ const userSchema = mongoose.Schema({
 	},
 	passwordConfirm: {
 		type: String,
-		required: [true, 'Please confirm your password!']
+		required: [true, 'Please confirm your password!'],
+		validate:{
+			validator:function(el){
+				return el === this.password
+			},
+			message:'Password are not same!'
+		}
 	},
 	passwordChangeAt: Date,
 	passwordResetToken: String,
@@ -41,6 +47,7 @@ userSchema.pre('save', async function(next) {
 	// console.log(123123);
 	if (!this.isModified('password')) return next();
 	//通过bcryptjs加密字符串
+
 	this.password = await bcrypt.hash(this.password, 12);
 	this.passwordConfirm = undefined;
 	next();

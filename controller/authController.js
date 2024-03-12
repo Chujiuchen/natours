@@ -5,14 +5,29 @@ const jwt = require('jsonwebtoken');
 const sendEmail = require('./../utils/email.js');
 const AppError = require('./../utils/appError');
 const crypto = require('crypto');
+const bcrypt = require('bcryptjs');
 
 //生产jwt令牌的函数通过 传id 然后把令牌return
 const signToken = id => {
 	return jwt.sign({ id }, process.env.JWT_SECRECT, { expiresIn: process.env.JWT_EXPIRES_IN });
 };
 
+//create jwt token
+const createSendToken = (user, statusCode, res) => {
+	const token = signToken(user._id);
+	//发送到客户端
+	res.status(statusCode).json({
+		status: 'success',
+		token,
+		data: {
+			user
+		}
+	});
+};
+
 //注册
 exports.signup = catchAsync(async (req, res, next) => {
+
 	const newUser = await User.create({
 		name: req.body.name,
 		email: req.body.email,
@@ -23,16 +38,7 @@ exports.signup = catchAsync(async (req, res, next) => {
 	// console.log(newUser);
 
 	//create jwt token
-	const token = signToken(newUser._id);
-	console.log(req.body.role);
-	//发送到客户端
-	res.status(201).json({
-		status: 'success',
-		token,
-		data: {
-			tour: newUser
-		}
-	});
+	createSendToken(newUser, 201, res);
 });
 
 //登录
@@ -56,11 +62,7 @@ exports.login = catchAsync(async (req, res, next) => {
 
 	//返回登录信息 发送token 到客户端
 	// console.log(user._id);
-	const token = signToken(user._id);
-	res.status(200).json({
-		status: 'success',
-		token
-	});
+	createSendToken(user, 200, res);
 });
 
 //验证登录信息 通过JWT token
@@ -141,7 +143,7 @@ exports.forgotPassword = catchAsync(async (req, res, next) => {
 		user.passwordResetToken = undefined;
 		user.passwordResetExpires = undefined;
 		//然后保存
-		await user.save({ validateBeforeSave: false });
+		await user.save();
 		//返回个错误提示
 		return next(new AppError('There was an error sending the email!Try again later!', 500));
 	}
@@ -158,11 +160,11 @@ exports.resetPassword = catchAsync(async (req, res, next) => {
 	if (!user) {
 		//没有用户说明token无效 或者过期了
 		return next(new AppError('Token is invalid or expires!', 400));
-
 	}
 	//接收用户传过来的数据
 	user.password = req.body.password;
 	user.passwordConfirm = req.body.passwordConfirm;
+
 	//token 和 有效期进行重置
 	user.passwordResetToken = undefined;
 	user.passwordResetExpires = undefined;
@@ -171,12 +173,25 @@ exports.resetPassword = catchAsync(async (req, res, next) => {
 	//添加修改时间的标记passwordChangeAt 通过userModel里面的
 	//userSchema.pre('save')
 	//保存成功后 登录用户 发送JWT
-	const token = signToken(user._id);
-	res.status(200).json({
-		status: 'success',
-		token
-	});
+	createSendToken(user, 200, res);
 });
 
+//更新用户密码
+exports.updatePassword = catchAsync(async (req, res, next) => {
+	//获取用户信息req.user.id 通过用户id查找数据库里用户的信息是否存在
+	const user = await User.findById(req.user.id).select('+password');
+	//验证用户密码是否正确
+	if (!(await user.correctPassword(req.body.passwordCurrent, user.password))) {
+		return next(new AppError('Your current password is wrong!', 401));
+	}
+	//更新用户的密码
+	user.password = req.body.password;
+	user.passwordConfirm = req.body.passwordConfirm;
 
+	//保存用户信息
+	await user.save();
+
+	////保存成功后 登录用户 发送JWT
+	createSendToken(user, 200, res);
+});
 
