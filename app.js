@@ -1,5 +1,6 @@
 const express = require('express');
 const morgan = require('morgan');
+const rateLimit = require('express-rate-limit');
 
 const AppError = require('./utils/appError');
 const globalErrorHandler = require('./controller/errorController');
@@ -7,6 +8,15 @@ const tourRouter = require('./routers/tourRoutes');
 const userRouter = require('./routers/userRoutes');
 
 const app = express();
+
+//限制同ip访问api的次数
+const limiter = rateLimit({
+	max: 100,
+	windowMs: 60 * 60 * 100,
+	message: 'Too many requests form this ip.Please try again in an hour!'
+});
+app.use('/api', limiter);
+
 
 app.use(express.json());
 
