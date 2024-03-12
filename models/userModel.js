@@ -36,12 +36,23 @@ const userSchema = mongoose.Schema({
 	passwordResetExpires: Date
 });
 
+//保存数据前自动执行的代码
 userSchema.pre('save', async function(next) {
 	// console.log(123123);
 	if (!this.isModified('password')) return next();
 	//通过bcryptjs加密字符串
 	this.password = await bcrypt.hash(this.password, 12);
 	this.passwordConfirm = undefined;
+	next();
+});
+
+//保存数据前自动执行的代码 添加用户修改密码的时间
+userSchema.pre('save', async function(next) {
+	//如果 没修改了密码 或者新创建的就 next跳过
+	if (!this.isModified('password') || this.isNew) return next();
+
+	//否则就创建时间到passwordChangeAT
+	this.passwordChangeAt = Date.now() + 1000;
 	next();
 });
 
@@ -63,7 +74,7 @@ userSchema.methods.changedPasswordAfter = function(JWTTimestamp) {
 userSchema.methods.createPasswordResetToken = function() {
 	//创建一个随机的字符串
 	const resetToken = crypto.randomBytes(32).toString('hex');
-	//创建忘记密码的token
+	//创建忘记密码的token 加密token
 	this.passwordResetToken = crypto.createHash('sha256').update(resetToken).digest('hex');
 	console.log({ resetToken }, this.passwordResetToken);
 	//创建时效 10分钟

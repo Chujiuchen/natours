@@ -4,13 +4,14 @@ const catchAsync = require('./../utils/catchAsync');
 const jwt = require('jsonwebtoken');
 const sendEmail = require('./../utils/email.js');
 const AppError = require('./../utils/appError');
-
+const crypto = require('crypto');
 
 //生产jwt令牌的函数通过 传id 然后把令牌return
 const signToken = id => {
 	return jwt.sign({ id }, process.env.JWT_SECRECT, { expiresIn: process.env.JWT_EXPIRES_IN });
 };
 
+//注册
 exports.signup = catchAsync(async (req, res, next) => {
 	const newUser = await User.create({
 		name: req.body.name,
@@ -34,6 +35,7 @@ exports.signup = catchAsync(async (req, res, next) => {
 	});
 });
 
+//登录
 exports.login = catchAsync(async (req, res, next) => {
 	//获取提交的用户信息
 	const { email, password } = req.body;
@@ -61,6 +63,7 @@ exports.login = catchAsync(async (req, res, next) => {
 	});
 });
 
+//验证登录信息 通过JWT token
 exports.protect = catchAsync(async (req, res, next) => {
 	//1) 检查验证是否登录
 	let token;
@@ -94,6 +97,7 @@ exports.protect = catchAsync(async (req, res, next) => {
 	next();
 });
 
+//判断用户权限
 exports.restrictTo = (...roles) => {
 	return (req, res, next) => {
 		//判断设置的全选 和用户所有的权限是否一直
@@ -115,9 +119,11 @@ exports.forgotPassword = catchAsync(async (req, res, next) => {
 	}
 	//获取随机的reset token
 	const resetToken = user.createPasswordResetToken();
+	//保存到数据库中 加密了的token保存到数据库
 	await user.save({ validateBeforeSave: false });
-	//发送邮件
+	//发送邮件 把未加密的token发送到客户端
 	const resetURL = `${req.protocol}://${req.get('host')}/api/v1/users/resetPassword/${resetToken}`;//整合个充值密码的url
+	//  http://localhost:3000/api/v1/users/resetPassword/68f33affc4747b44df7e0aaf5e1715918ffd8592d4be288205d7bd42a46dc61f.
 	const message = `Forgot your password? Submit a PATCH request with your new password and passwordConfirm to: ${resetURL}.\nIf you didn't forget your password, please ignore this email!`;
 	try {
 		//调用发送邮件的中间件
@@ -139,6 +145,37 @@ exports.forgotPassword = catchAsync(async (req, res, next) => {
 		//返回个错误提示
 		return next(new AppError('There was an error sending the email!Try again later!', 500));
 	}
+});
+
+//重置密码
+exports.resetPassword = catchAsync(async (req, res, next) => {
+	//获取链接中的未加密token 进行加密
+	const hashedToken = crypto.createHash('sha256').update(req.params.token).digest('hex');
+	console.log(hashedToken);
+	//去数据库里查找用户通过hashedToken
+	const user = await User.findOne({ passwordResetToken: hashedToken, passwordResetExpires: { $gt: Date.now() } });
+	//如果有用户且token有效性没有过期
+	if (!user) {
+		//没有用户说明token无效 或者过期了
+		return next(new AppError('Token is invalid or expires!', 400));
+
+	}
+	//接收用户传过来的数据
+	user.password = req.body.password;
+	user.passwordConfirm = req.body.passwordConfirm;
+	//token 和 有效期进行重置
+	user.passwordResetToken = undefined;
+	user.passwordResetExpires = undefined;
+	//保存数据到数据库中
+	await user.save();
+	//添加修改时间的标记passwordChangeAt 通过userModel里面的
+	//userSchema.pre('save')
+	//保存成功后 登录用户 发送JWT
+	const token = signToken(user._id);
+	res.status(200).json({
+		status: 'success',
+		token
+	});
 });
 
 
