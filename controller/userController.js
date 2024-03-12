@@ -13,6 +13,7 @@ const filterObj = (obj, ...allowedFields) => {
 	return newObj;
 };
 
+//更新用户的信息
 exports.updataMe = catchAsync(async (req, res, next) => {
 	// console.log(111)
 	//安全判断 如果包含密码直接弹个错误
@@ -30,20 +31,35 @@ exports.updataMe = catchAsync(async (req, res, next) => {
 	});
 
 	res.status(200).json({
-		status:'success',
-		data:{
-			user:updateUser
+		status: 'success',
+		data: {
+			user: updateUser
 		}
+	});
+});
+
+//删除用户把活跃标记为false  不进行如何数据删除 只把数据标记为非活跃用户
+exports.deleteMe = catchAsync(async (req, res, next) => {
+	await User.findByIdAndUpdate(req.user.id, { active: false });
+	res.status(204).json({
+		status:'success',
+		data:null
 	})
 });
 
-
-exports.getAllUsers = (req, res) => {
-	res.status(500).json({
-		status: 'error',
-		message: 'This route is not build'
+//获取所有用户数据
+exports.getAllUsers = catchAsync(async (req, res) => {
+	const user = await User.find();
+	if (!user) {
+		return next(new AppError('No user found!', 404));
+	}
+	res.status(200).json({
+		status: 'success',
+		data: {
+			user
+		}
 	});
-};
+});
 exports.getUser = catchAsync(async (req, res, next) => {
 	const user = await User.findById(req.params.id);
 	if (!user) {

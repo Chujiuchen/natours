@@ -30,16 +30,21 @@ const userSchema = mongoose.Schema({
 	passwordConfirm: {
 		type: String,
 		required: [true, 'Please confirm your password!'],
-		validate:{
-			validator:function(el){
-				return el === this.password
+		validate: {
+			validator: function(el) {
+				return el === this.password;
 			},
-			message:'Password are not same!'
+			message: 'Password are not same!'
 		}
 	},
 	passwordChangeAt: Date,
 	passwordResetToken: String,
-	passwordResetExpires: Date
+	passwordResetExpires: Date,
+	active: {
+		type: Boolean,
+		select: false,
+		default: true
+	}
 });
 
 //保存数据前自动执行的代码
@@ -47,7 +52,6 @@ userSchema.pre('save', async function(next) {
 	// console.log(123123);
 	if (!this.isModified('password')) return next();
 	//通过bcryptjs加密字符串
-
 	this.password = await bcrypt.hash(this.password, 12);
 	this.passwordConfirm = undefined;
 	next();
@@ -57,9 +61,15 @@ userSchema.pre('save', async function(next) {
 userSchema.pre('save', async function(next) {
 	//如果 没修改了密码 或者新创建的就 next跳过
 	if (!this.isModified('password') || this.isNew) return next();
-
 	//否则就创建时间到passwordChangeAT
 	this.passwordChangeAt = Date.now() + 1000;
+	next();
+});
+
+//查询数据前执行
+userSchema.pre(/^find/, async function(next) {
+	//把活跃标记隐藏 是false的用户全部隐藏
+	this.find({ active: { $ne: false } });
 	next();
 });
 
