@@ -97,8 +97,8 @@ const tourSchema = mongoose.Schema({
 			day: Number
 		}],
 		guides: [{
-			type:mongoose.Schema.ObjectId,//mongoDB 的id类型
-			ref:'User'//指向那个表
+			type: mongoose.Schema.ObjectId,//mongoDB 的id类型
+			ref: 'User'//指向那个表
 		}]
 	}, {
 		toJSON: { virtuals: true },
@@ -127,6 +127,15 @@ tourSchema.pre('save', function(next) {
 tourSchema.pre(/^find/, function(next) {
 	this.find({ secretTour: { $ne: true } });
 	this.start = Date.now();
+	next();
+});
+
+tourSchema.pre(/^find/, function(next) {
+	//每次查询前执行 把user数据加进tour中对应的user._id
+	this.populate({
+		path: 'guides',
+		select: '-__v -passwordResetExpires -passwordResetToken -passwordChangeAt'
+	});
 	next();
 });
 
