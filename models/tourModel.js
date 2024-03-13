@@ -41,13 +41,13 @@ const tourSchema = mongoose.Schema({
 			required: [true, 'A tour must have a price!']
 		},
 		priceDiscount: {
-			type:Number,
-			validate:{
+			type: Number,
+			validate: {
 				validator: function(val) {
 					//this 只能指向新创建的Tour 所以updata数据不能生效这个验证规则
 					return val < this.price;
 				},
-				message:'Discount price {VALUE} should be below regular price!',
+				message: 'Discount price {VALUE} should be below regular price!'
 			}
 		},
 		secretTour: {
@@ -72,7 +72,28 @@ const tourSchema = mongoose.Schema({
 			default: Date.now(),
 			select: false
 		},
-		startDates: [Date]
+		startDates: [Date],
+		startLocation: {
+			type: {
+				type: String,
+				default: 'Point',
+				enum: ['Point']
+			},
+			coordinates: [Number],
+			address: String,
+			description: String
+		},
+		locations: [{
+			type: {
+				type: String,
+				default: 'Point',
+				enum: ['Point']
+			},
+			coordinates: [Number],
+			address: String,
+			description: String,
+			day: Number
+		}]
 	}, {
 		toJSON: { virtuals: true },
 		toObject: { virtuals: true }
