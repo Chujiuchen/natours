@@ -1,5 +1,7 @@
 const mongoose = require('mongoose');
 const slugify = require('slugify');
+const User = require('./../models/userModel');
+
 const tourSchema = mongoose.Schema({
 		name: {
 			type: String,
@@ -93,7 +95,8 @@ const tourSchema = mongoose.Schema({
 			address: String,
 			description: String,
 			day: Number
-		}]
+		}],
+		guides: Array
 	}, {
 		toJSON: { virtuals: true },
 		toObject: { virtuals: true }
@@ -109,6 +112,13 @@ tourSchema.pre('save', function(next) {
 	this.slug = slugify(this.name, { lower: true });
 	next();
 });
+//获取到每个旅游 对应的每个导游的信息、
+tourSchema.pre('save',async function(next) {
+	const guidesPromise = this.guides.map(async id =>await User.findById(id));
+	this.guides =await Promise.all(guidesPromise);
+	next();
+});
+
 
 //查询前限制 secretTour = true 的全部不显示  等同于vip内容
 tourSchema.pre(/^find/, function(next) {
