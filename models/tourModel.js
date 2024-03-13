@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 const slugify = require('slugify');
-const User = require('./../models/userModel');
+// const User = require('./../models/userModel');
 
 const tourSchema = mongoose.Schema({
 		name: {
@@ -96,7 +96,10 @@ const tourSchema = mongoose.Schema({
 			description: String,
 			day: Number
 		}],
-		guides: Array
+		guides: [{
+			type:mongoose.Schema.ObjectId,//mongoDB 的id类型
+			ref:'User'//指向那个表
+		}]
 	}, {
 		toJSON: { virtuals: true },
 		toObject: { virtuals: true }
@@ -113,11 +116,11 @@ tourSchema.pre('save', function(next) {
 	next();
 });
 //获取到每个旅游 对应的每个导游的信息、
-tourSchema.pre('save',async function(next) {
-	const guidesPromise = this.guides.map(async id =>await User.findById(id));
-	this.guides =await Promise.all(guidesPromise);
-	next();
-});
+// tourSchema.pre('save',async function(next) {
+// 	const guidesPromise = this.guides.map(async id =>await User.findById(id));
+// 	this.guides =await Promise.all(guidesPromise);
+// 	next();
+// });
 
 
 //查询前限制 secretTour = true 的全部不显示  等同于vip内容
