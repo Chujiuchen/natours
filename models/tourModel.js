@@ -110,6 +110,13 @@ tourSchema.virtual('durationWeeks').get(function() {
 	return this.duration / 7;
 });
 
+//virtual populate 通过从tour查询到数据
+tourSchema.virtual('reviews',{
+	ref:'Review',//对应的model
+	foreignField:'tour',//外部对应tour
+	localField:'_id'//通过_id
+})
+
 //获取到slug和name属性 然后赋值
 tourSchema.pre('save', function(next) {
 	this.slug = slugify(this.name, { lower: true });
@@ -131,7 +138,7 @@ tourSchema.pre(/^find/, function(next) {
 });
 
 tourSchema.pre(/^find/, function(next) {
-	//每次查询前执行 把user数据加进tour中对应的user._id
+	//每次查询前执行 把user数据加进tour中对应的user._id 每个tour的guide信息
 	this.populate({
 		path: 'guides',
 		select: '-__v -passwordResetExpires -passwordResetToken -passwordChangeAt'

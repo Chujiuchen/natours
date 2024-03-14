@@ -34,12 +34,16 @@ const reviewSchema = new mongoose.Schema(
 
 reviewSchema.pre(/^find/, function(next) {
 	//每次查询前执行 把user数据加进tour中对应的user._id
+	// this.populate({
+	// 	path: 'user',
+	// 	select: 'name'
+	// }).populate({
+	// 	path:'tour',
+	// 	select:'name photo'
+	// });
 	this.populate({
 		path: 'user',
 		select: 'name'
-	}).populate({
-		path:'tour',
-		select:'name photo'
 	});
 	next();
 });
