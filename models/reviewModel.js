@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 //创建评价Model 每个旅游都需要有评论 每个评论都需要有用户
-const reviewSchema = new mngoose.Schema(
+const reviewSchema = new mongoose.Schema(
 	{
 		review: {
 			type: String,
@@ -26,10 +26,24 @@ const reviewSchema = new mngoose.Schema(
 			require: [true, 'Review must belong to a user.']
 		}
 
-	},{
+	}, {
 		toJSON: { virtuals: true },
 		toObject: { virtuals: true }
 	}
 );
+
+reviewSchema.pre(/^find/, function(next) {
+	//每次查询前执行 把user数据加进tour中对应的user._id
+	this.populate({
+		path: 'user',
+		select: 'name'
+	}).populate({
+		path:'tour',
+		select:'name photo'
+	});
+	next();
+});
+
+
 const Review = mongoose.model('Review', reviewSchema);
 module.exports = Review;

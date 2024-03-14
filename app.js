@@ -10,6 +10,7 @@ const AppError = require('./utils/appError');
 const globalErrorHandler = require('./controller/errorController');
 const tourRouter = require('./routers/tourRoutes');
 const userRouter = require('./routers/userRoutes');
+const reviewRouter = require('./routers/reviewRoutes');
 
 const app = express();
 
@@ -47,6 +48,7 @@ app.use(express.static(`${__dirname}/public`));
 //两个url
 app.use('/api/v1/tours', tourRouter);
 app.use('/api/v1/users', userRouter);
+app.use('/api/v1/reviews', reviewRouter);
 
 //不是指定的路由 就提示404
 app.all('*', (req, res, next) => {
