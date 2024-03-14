@@ -75,7 +75,7 @@ exports.login = catchAsync(async (req, res, next) => {
 
 //验证登录信息 通过JWT token
 exports.protect = catchAsync(async (req, res, next) => {
-	console.log(111);
+	// console.log(111);
 	//1) 检查验证是否登录
 	let token;
 	//获取token check 它是否存在
@@ -84,10 +84,12 @@ exports.protect = catchAsync(async (req, res, next) => {
 		token = req.headers.authorization.split(' ')[1];
 	}
 	// console.log(token);
+
 	if (!token) {
-		return new AppError('You are not logged in!Please log in to get access.', 401);
+		//修复!token 导致的错误
+		return next(new AppError('You are not logged in!Please log in to get access.', 401));
 	}
-// console.log(111222)
+
 
 	//2) 验证登录的jwt token
 	const decoded = await promisify(jwt.verify)(token, process.env.JWT_SECRECT);

@@ -14,6 +14,12 @@ const filterObj = (obj, ...allowedFields) => {
 	return newObj;
 };
 
+//获取当前用户id
+exports.getMe = catchAsync(async (req, res, next) => {
+	req.params.id = req.user.id;
+	next();
+});
+
 //更新用户的信息
 exports.updataMe = catchAsync(async (req, res, next) => {
 	// console.log(111)
@@ -43,9 +49,9 @@ exports.updataMe = catchAsync(async (req, res, next) => {
 exports.deleteMe = catchAsync(async (req, res, next) => {
 	await User.findByIdAndUpdate(req.user.id, { active: false });
 	res.status(204).json({
-		status:'success',
-		data:null
-	})
+		status: 'success',
+		data: null
+	});
 });
 
 //获取所有用户数据
