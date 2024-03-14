@@ -73,17 +73,10 @@ exports.getUser = catchAsync(async (req, res, next) => {
 		}
 	});
 });
-exports.createUser = (req, res) => {
-	res.status(500).json({
-		status: 'error',
-		message: 'This route is not build'
-	});
-};
-exports.updateUser = (req, res) => {
-	res.status(500).json({
-		status: 'error',
-		message: 'This route is not build'
-	});
-};
+
+//调用工厂的创建函数
+exports.createUser = factory.createOne(User);
+//调用工厂的更新函数
+exports.updateUser = factory.updateOne(User);
 //调用工厂的删除函数
 exports.deleteUser = factory.deleteOne(User);

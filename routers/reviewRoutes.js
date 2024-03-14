@@ -11,7 +11,7 @@ router.route('/')
 	// 处理 GET 请求，调用 reviewController 的 getAllReviews 方法
 	.get(reviewController.getAllReviews)
 	// 处理 POST 请求，先调用 authController 的 protect 方法进行身份验证，然后调用 authController 的 restrictTo 方法限制权限为'user'，最后调用 reviewController 的 createReview 方法创建评论
-	.post(authController.protect, authController.restrictTo('user'), reviewController.createReview);
+	.post(authController.protect, authController.restrictTo('user'), reviewController.setTourAndUserId, reviewController.createReview);
 
 //创建删除review路由
 router.route('/:id').delete(reviewController.deleteReview);
