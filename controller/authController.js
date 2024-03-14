@@ -75,6 +75,7 @@ exports.login = catchAsync(async (req, res, next) => {
 
 //验证登录信息 通过JWT token
 exports.protect = catchAsync(async (req, res, next) => {
+	console.log(111);
 	//1) 检查验证是否登录
 	let token;
 	//获取token check 它是否存在
@@ -110,7 +111,7 @@ exports.protect = catchAsync(async (req, res, next) => {
 //判断用户权限
 exports.restrictTo = (...roles) => {
 	return (req, res, next) => {
-		//判断设置的全选 和用户所有的权限是否一直
+		//判断设置的权限 和 用户所有的权限是否一直
 		if (!roles.includes(req.user.role)) {
 			//不一致就提示错误
 			return next(new AppError('You do not have permission to perform this action', 401));
