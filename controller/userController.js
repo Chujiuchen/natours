@@ -1,6 +1,7 @@
 const User = require('../models/userModel');
 const AppError = require('../utils/appError');
 const catchAsync = require('./../utils/catchAsync');
+const factory = require('./handlerFactory');
 
 
 const filterObj = (obj, ...allowedFields) => {
@@ -84,9 +85,5 @@ exports.updateUser = (req, res) => {
 		message: 'This route is not build'
 	});
 };
-exports.deleteUser = (req, res) => {
-	res.status(500).json({
-		status: 'error',
-		message: 'This route is not build'
-	});
-};
+//调用工厂的删除函数
+exports.deleteUser = factory.deleteOne(User);

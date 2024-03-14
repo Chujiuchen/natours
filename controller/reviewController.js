@@ -1,6 +1,7 @@
 //创建review控制器
 const Review = require('./../models/reviewModel');
 const catchAsync = require('./../utils/catchAsync');
+const factory = require('./handlerFactory');
 
 //获取所有review
 exports.getAllReviews = catchAsync(async (req, res, next) => {
@@ -37,3 +38,5 @@ exports.createReview = catchAsync(async (req, res, next) => {
 		}
 	});
 });
+//调用工厂的删除函数
+exports.deleteReview = factory.deleteOne(Review);

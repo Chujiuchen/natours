@@ -2,6 +2,7 @@ const Tour = require('./../models/tourModel');
 const APIFeatures = require('./../utils/apiFeatures');
 const catchAsync = require('./../utils/catchAsync');
 const AppError = require('./../utils/appError');
+const factory = require('./handlerFactory');
 
 //展示前五的旅游数据
 exports.aliasTopTours = (req, res, next) => {
@@ -52,17 +53,8 @@ exports.createTour = catchAsync(async (req, res, next) => {
 	});
 });
 
-//删除tour
-exports.deleteTour = catchAsync(async (req, res, next) => {
-	const tour = await Tour.findByIdAndDelete(req.params.id);
-	if (!tour) {
-		return next(new AppError('No tour found with this id!', 404));
-	}
-	res.status(204).json({
-		status: 'success',
-		data: null
-	});
-});
+////调用工厂的删除函数
+exports.deleteTour = factory.deleteOne(Tour);
 
 //更新tour
 exports.updateTour = catchAsync(async (req, res, next) => {
