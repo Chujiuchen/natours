@@ -14,6 +14,6 @@ router.route('/')
 	.post(authController.protect, authController.restrictTo('user'), reviewController.setTourAndUserId, reviewController.createReview);
 
 //创建删除review路由
-router.route('/:id').delete(reviewController.deleteReview);
+router.route('/:id').delete(reviewController.deleteReview).get(reviewController.getReview);
 
 module.exports = router;

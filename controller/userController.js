@@ -49,31 +49,9 @@ exports.deleteMe = catchAsync(async (req, res, next) => {
 });
 
 //获取所有用户数据
-exports.getAllUsers = catchAsync(async (req, res) => {
-	const user = await User.find();
-	if (!user) {
-		return next(new AppError('No user found!', 404));
-	}
-	res.status(200).json({
-		status: 'success',
-		data: {
-			user
-		}
-	});
-});
-exports.getUser = catchAsync(async (req, res, next) => {
-	const user = await User.findById(req.params.id);
-	if (!user) {
-		return next(new AppError('No tour found with this id!', 404));
-	}
-	res.status(200).json({
-		status: 'success',
-		data: {
-			user
-		}
-	});
-});
-
+exports.getAllUsers = factory.getAll(User);
+//调用工厂函数 获取单个用户数据
+exports.getUser = factory.getOne(User);
 //调用工厂的创建函数
 exports.createUser = factory.createOne(User);
 //调用工厂的更新函数

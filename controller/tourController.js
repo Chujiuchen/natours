@@ -1,7 +1,7 @@
 const Tour = require('./../models/tourModel');
-const APIFeatures = require('./../utils/apiFeatures');
+// const APIFeatures = require('./../utils/apiFeatures');
 const catchAsync = require('./../utils/catchAsync');
-const AppError = require('./../utils/appError');
+// const AppError = require('./../utils/appError');
 const factory = require('./handlerFactory');
 
 //展示前五的旅游数据
@@ -13,37 +13,12 @@ exports.aliasTopTours = (req, res, next) => {
 };
 
 //获取所有tours
-exports.getAllTours = catchAsync(async (req, res, next) => {
-	const features = new APIFeatures(Tour.find(), req.query).filter().sort().limitFields().pagination();
-	const tours = await features.query;
-	// console.log(11)
-	//send response
-	res.status(200).json({
-		status: 'success',
-		result: tours.length,
-		data: {
-			tours
-		}
-	});
-});
-
+exports.getAllTours = factory.getAll(Tour);
 //获取单独的tour
-exports.getTour = catchAsync(async (req, res, next) => {
-	const tour = await Tour.findById(req.params.id).populate('reviews');//virtual populate name
-	if (!tour) {
-		return next(new AppError('No tour found with this id!', 404));
-	}
-	res.status(200).json({
-		status: 'success',
-		data: {
-			tour
-		}
-	});
-});
-
+exports.getTour = factory.getOne(Tour, 'reviews');
 //创建tour
 exports.createTour = factory.createOne(Tour);
-////调用工厂的删除函数
+//调用工厂的删除函数
 exports.deleteTour = factory.deleteOne(Tour);
 //更新tour
 exports.updateTour = factory.updateOne(Tour);
