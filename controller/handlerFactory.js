@@ -1,7 +1,7 @@
 //创建工厂函数 deleteOne updateOne createOne这样每个功能都能调用这个函数
 const catchAsync = require('../utils/catchAsync');
 const AppError = require('../utils/appError');
-const Tour = require('../models/tourModel');
+// const Tour = require('../models/tourModel');
 const APIFeatures = require('../utils/apiFeatures');
 //工厂封装删除函数
 exports.deleteOne = Model => catchAsync(async (req, res, next) => {
@@ -34,7 +34,7 @@ exports.updateOne = Model => catchAsync(async (req, res, next) => {
 //工厂封装创建函数
 exports.createOne = Model => catchAsync(async (req, res, next) => {
 	const doc = await Model.create(req.body);
-	console.log(doc);
+	// console.log(doc);
 	res.status(201).json({
 		status: 'success',
 		data: {
