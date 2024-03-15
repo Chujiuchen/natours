@@ -118,6 +118,11 @@ tourSchema.virtual('reviews', {
 	localField: '_id'//通过_id
 });
 
+tourSchema.index({ price: 1, ratingsAverage: -1 });
+tourSchema.index({ slug: 1 });
+tourSchema.index({ startLocation: '2dsphere' });
+
+
 //获取到slug和name属性 然后赋值
 tourSchema.pre('save', function(next) {
 	this.slug = slugify(this.name, { lower: true });
@@ -153,10 +158,10 @@ tourSchema.post(/^find/, function(docs, next) {
 });
 
 // 聚合函数查询的数据 没有提前过滤条件 这个就是在聚合函数查询前 添加一个条件到聚合函数中在进行next
-tourSchema.pre('aggregate', function(next) {
-	this.pipeline().unshift({ $match: { secretTour: { $ne: true } } });
-	next();
-});
+// tourSchema.pre('aggregate', function(next) {
+// 	this.pipeline().unshift({ $match: { secretTour: { $ne: true } } });
+// 	next();
+// });
 
 // tourSchema.pre('save', function(next) {
 // 	console.log('Will save document...')

@@ -17,8 +17,10 @@ router.route('/:id')
 	.patch(authController.protect, authController.restrictTo('admin', 'lead-guide'), tourController.updateTour)
 	.delete(authController.protect, authController.restrictTo('admin', 'lead-guide'), tourController.deleteTour);
 
-//当前用户评论
-// router.route('/:tourId/reviews').post(authController.protect,authController.restrictTo('user'),reviewController.createReview);
+router.route('/tours-within/:distance/center/:latlng/unit/:unit')
+	.get(tourController.getToursWithin);
+router.route('/distances/:latlng/unit/:unit')
+	.get(tourController.getDistances);
 
 //使用use方法将reviewRouter挂载到当前路由上，这样就可以在当前路由下使用/reviews路由
 router.use('/:tourId/reviews', reviewRouter);
