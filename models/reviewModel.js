@@ -33,6 +33,9 @@ const reviewSchema = new mongoose.Schema(
 	}
 );
 
+// 设置索引 保证每个用户给每个旅游的评论只能有一个
+reviewSchema.index({ tour: 1, user: 1 }, { unique: true });
+
 reviewSchema.pre(/^find/, function(next) {
 	//每次查询前执行 把user数据加进tour中对应的user._id
 	// this.populate({

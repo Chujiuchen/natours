@@ -32,7 +32,8 @@ const tourSchema = mongoose.Schema({
 			type: Number,
 			default: 4.5,//默认值
 			min: [1, 'Rating must be above 1.0!'],//最大值
-			max: [5, 'Rating must be below 5.0!']//最小值
+			max: [5, 'Rating must be below 5.0!'],//最小值，
+			set: v => Math.round(v * 10) / 10//四舍五入保留两位小数
 		},
 		ratingsQuantity: {
 			type: Number,
@@ -111,11 +112,11 @@ tourSchema.virtual('durationWeeks').get(function() {
 });
 
 //virtual populate 通过从tour查询到数据
-tourSchema.virtual('reviews',{
-	ref:'Review',//对应的model
-	foreignField:'tour',//外部对应tour
-	localField:'_id'//通过_id
-})
+tourSchema.virtual('reviews', {
+	ref: 'Review',//对应的model
+	foreignField: 'tour',//外部对应tour
+	localField: '_id'//通过_id
+});
 
 //获取到slug和name属性 然后赋值
 tourSchema.pre('save', function(next) {
