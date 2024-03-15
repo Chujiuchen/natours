@@ -16,11 +16,11 @@ exports.aliasTopTours = (req, res, next) => {
 exports.getAllTours = factory.getAll(Tour);
 //获取单独的tour
 exports.getTour = factory.getOne(Tour, 'reviews');
-//创建tour
+////调用工厂的创建函数创建tour
 exports.createTour = factory.createOne(Tour);
-//调用工厂的删除函数
+//调用工厂的删除函数删除tour
 exports.deleteTour = factory.deleteOne(Tour);
-//更新tour
+//调用工厂的更新函数更新tour
 exports.updateTour = factory.updateOne(Tour);
 
 //通过聚合 自定义获取旅游的所有属性
