@@ -53,7 +53,10 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 //路由
 app.get('/', (req, res) => {
-	res.status(200).render('base');//已经导入了views文件夹，所以可以直接找到base文件
+	res.status(200).render('base',{
+		tour: 'The Great Wall',
+		user: 'Carry'
+	});//已经导入了views文件夹，所以可以直接找到base文件
 });
 //三个url
 app.use('/api/v1/tours', tourRouter);
