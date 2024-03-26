@@ -51,9 +51,20 @@ app.use(hpp({
 //express能读取到public文件中的所有文件
 app.use(express.static(path.join(__dirname, 'public')));
 
+app.get('/overview', (req, res) => {
+	res.status(200).render('overview', {
+		title: 'All Tours'
+	});
+});
+app.get('/tour', (req, res) => {
+	res.status(200).render('overview', {
+		title: 'The Forest Hiker'
+	});
+});
+
 //路由
 app.get('/', (req, res) => {
-	res.status(200).render('base',{
+	res.status(200).render('base', {
 		tour: 'The Great Wall',
 		user: 'Carry'
 	});//已经导入了views文件夹，所以可以直接找到base文件
