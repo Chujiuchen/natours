@@ -12,6 +12,7 @@ const globalErrorHandler = require('./controller/errorController');
 const tourRouter = require('./routers/tourRoutes');
 const userRouter = require('./routers/userRoutes');
 const reviewRouter = require('./routers/reviewRoutes');
+const viewRouter = require('./routers/viewRoutes');
 
 const app = express();
 
@@ -51,25 +52,8 @@ app.use(hpp({
 //express能读取到public文件中的所有文件
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.get('/overview', (req, res) => {
-	res.status(200).render('overview', {
-		title: 'All Tours'
-	});
-});
-app.get('/tour', (req, res) => {
-	res.status(200).render('overview', {
-		title: 'The Forest Hiker'
-	});
-});
-
-//路由
-app.get('/', (req, res) => {
-	res.status(200).render('base', {
-		tour: 'The Great Wall',
-		user: 'Carry'
-	});//已经导入了views文件夹，所以可以直接找到base文件
-});
-//三个url
+//4个url
+app.use('/',viewRouter)
 app.use('/api/v1/tours', tourRouter);
 app.use('/api/v1/users', userRouter);
 app.use('/api/v1/reviews', reviewRouter);
