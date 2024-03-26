@@ -1,12 +1,51 @@
 doctype html
 html
     head
-        title Natours | #{tour}
+        meta(charset='UTF-8')
+        meta(name='viewport' content='width=device-width, initial-scale=1.0')
+        link(href='https://fonts.googleapis.com/css?family=Lato:300,300i,700', rel='stylesheet')
         link(rel='stylesheet', href='css/style.css')
-        link(rel='shortcut icon' type='image/png' href='img/favicon.png')
+        link(rel='shortcut icon', type='image/png', href='img/favicon.png')
+        title Natours | Exciting tours for adventurous people
 
     body
-        h1= tour
-        h1= user.toUpperCase()
-        p This is a simple Pug template.
+        //header
+        header.header
+            nav.nav.nav--tours
+                a(href='#').nav__el All tours
+                form.nav__search
+                    button.nav__search-btn
+                        svg
+                            use(xlink:href='img/icons.svg#icon-search')
+                    input(type='text', placeholder='Search tours', class='nav__search-input')
+            div.header__logo
+                img(src='img/logo-white.png', alt='Natours logo')
+            nav.nav.nav--user
+                a(href='#').nav__el My bookings
+                a(href='#').nav__el
+                    img.nav__user-img(src='img/user.jpg', alt='User photo')
+                    span Jonas
+                button.nav__el Log in
+                button.nav__el.nav__el--cta Sign up
 
+        //content
+        section.content
+            h1= tour
+
+        //footer
+        footer.footer
+            div.footer__logo
+                img(src='img/logo-green.png', alt='Natours logo')
+            ul.footer__nav
+                li
+                    a(href='#') About us
+                li
+                    a(href='#') Download apps
+                li
+                    a(href='#') Become a guide
+                li
+                    a(href='#') Careers
+                li
+                    a(href='#') Contact
+            p.footer__copyright
+                | &copy; by Carry Schmedtmann. All rights reserved.
