@@ -5,6 +5,7 @@ const helmet = require('helmet');
 const mongoSanitize = require('express-mongo-sanitize');
 const xss = require('xss-clean');
 const hpp = require('hpp');
+const path = require('path');
 
 const AppError = require('./utils/appError');
 const globalErrorHandler = require('./controller/errorController');
@@ -13,6 +14,11 @@ const userRouter = require('./routers/userRoutes');
 const reviewRouter = require('./routers/reviewRoutes');
 
 const app = express();
+
+//set view engine
+app.set('view engine', 'pug');
+//set views folder
+app.set('views', path.join(__dirname, 'views'));
 
 //set security HTTP headers
 app.use(helmet());
@@ -43,9 +49,13 @@ app.use(hpp({
 }));
 
 //express能读取到public文件中的所有文件
-app.use(express.static(`${__dirname}/public`));
+app.use(express.static(path.join(__dirname, 'public')));
 
-//两个url
+//路由
+app.get('/', (req, res) => {
+	res.status(200).render('base');//已经导入了views文件夹，所以可以直接找到base文件
+});
+//三个url
 app.use('/api/v1/tours', tourRouter);
 app.use('/api/v1/users', userRouter);
 app.use('/api/v1/reviews', reviewRouter);
