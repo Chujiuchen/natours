@@ -5,6 +5,6 @@ const viewsController = require('../controller/viewsController');
 // Route to get the overview page
 router.get('/', viewsController.getOverview);
 // Route to get the tour page
-router.get('/tour', viewsController.getTour);
+router.get('/tour/:slug', viewsController.getTour);
 
 module.exports = router;
