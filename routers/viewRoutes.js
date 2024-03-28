@@ -7,4 +7,6 @@ router.get('/', viewsController.getOverview);
 // Route to get the tour page
 router.get('/tour/:slug', viewsController.getTour);
 
+router.get('/login',viewsController.getLoginFrom);
+
 module.exports = router;
