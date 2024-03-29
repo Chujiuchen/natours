@@ -82,6 +82,9 @@ exports.protect = catchAsync(async (req, res, next) => {
 	if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {//开头是否为这个字符串
 		//[Bearer xxx] 通过空格分割获得
 		token = req.headers.authorization.split(' ')[1];
+	} else if (req.cookies.jwt) {
+		//如果没有头部信息 就从cookie里获取token
+		token = req.cookies.jwt;
 	}
 	// console.log(token);
 

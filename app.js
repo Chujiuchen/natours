@@ -6,6 +6,8 @@ const mongoSanitize = require('express-mongo-sanitize');
 const xss = require('xss-clean');
 const hpp = require('hpp');
 const path = require('path');
+const cors = require('cors');
+const coookieParser = require('cookie-parser');
 
 const AppError = require('./utils/appError');
 const globalErrorHandler = require('./controller/errorController');
@@ -15,6 +17,8 @@ const reviewRouter = require('./routers/reviewRoutes');
 const viewRouter = require('./routers/viewRoutes');
 
 const app = express();
+
+app.use(cors());
 
 //set view engine
 app.set('view engine', 'pug');
@@ -40,6 +44,8 @@ app.use(express.json({
 	limit: '10kb'
 }));
 
+app.use(coookieParser());
+
 //NoSQL query injection 防止"email":{"$gt":""} 直接就能登录
 app.use(mongoSanitize());
 //XSS 这个将去除如何用户输入的html代码
@@ -48,6 +54,12 @@ app.use(xss());
 app.use(hpp({
 	whitelist: ['ratingsAverage', 'ratingsQuantity', 'duration', 'maxGroupSize', 'difficulty', 'price']
 }));
+
+app.use((req, res, next)=>{
+	req.requestTime = new Date().toISOString();
+	console.log(req.cookies)
+	next();
+})
 
 //express能读取到public文件中的所有文件
 app.use(express.static(path.join(__dirname, 'public')));
