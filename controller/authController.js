@@ -73,26 +73,42 @@ exports.login = catchAsync(async (req, res, next) => {
 	createSendToken(user, 200, res);
 });
 
+//退出登录
+exports.logout = catchAsync(async (req, res, next) => {
+	//选择覆盖jwt来实现验证不了而退出登录
+	res.cookie('jwt', 'loggedout', {
+		expires: new Date(Date.now() + 10 * 1000),
+		httpOnly: true
+	});
+	res.status(200).json({
+		status:'success'
+	});
+});
+
 //只用做渲染页面的中间件
-exports.isLoggedIn = catchAsync(async (req, res, next) => {
-	if (req.cookies.jwt) {
-		//1) 检查验证是否登录
-		const decoded = await promisify(jwt.verify)(req.cookies.jwt, process.env.JWT_SECRECT);
-		//2) 检查用户是否还存在
-		const currentUser = await User.findById(decoded.id);
-		if (!currentUser) {
+exports.isLoggedIn = async (req, res, next) => {
+	try{
+		if (req.cookies.jwt) {
+			//1) 检查验证是否登录
+			const decoded = await promisify(jwt.verify)(req.cookies.jwt, process.env.JWT_SECRECT);
+			//2) 检查用户是否还存在
+			const currentUser = await User.findById(decoded.id);
+			if (!currentUser) {
+				return next();
+			}
+			//3) Check user changed password after the token was issued
+			if (currentUser.changedPasswordAfter(decoded.iat)) {
+				return next();
+			}
+			//说明有一个用户登录 并且没有修改密码 就把用户信息保存到req.locals.user
+			res.locals.user = currentUser;
 			return next();
 		}
-		//3) Check user changed password after the token was issued
-		if (currentUser.changedPasswordAfter(decoded.iat)) {
-			return next();
-		}
-		//说明有一个用户登录 并且没有修改密码 就把用户信息保存到req.locals.user
-		res.locals.user = currentUser;
-		return next();
+	}catch(err){
+		console.log(err);
 	}
 	next();
-});
+};
 
 
 //验证登录信息 通过JWT token

@@ -1,9 +1,9 @@
 import '@babel/polyfill';
-import { login } from './login';
-
+import { login, logout } from './login';
 //判断是否有这个元素
 const mapBox = document.getElementById('map');
 const loginForm = document.querySelector('.form');
+const loginBtn = document.querySelector('.nav__el--logout');
 
 //进行数据判断
 if (mapBox) {
@@ -16,5 +16,10 @@ if (loginForm) {
 		const email = document.getElementById('email').value;
 		const password = document.getElementById('password').value;
 		login(email, password);
+	});
+}
+if (loginBtn) {
+	loginBtn.addEventListener('click', () => {
+		logout();
 	});
 }
