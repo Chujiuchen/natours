@@ -24,31 +24,53 @@ const handleJWTError = () => new AppError('Invalid token. Please log in again!',
 //jwt 过期 错误处理
 const handleJWTExpiredError = () => new AppError('Your token has expired. Please log in again!', 401);
 
-const sendErrorDev = (err, res) => {
+const sendErrorDev = (err, req, res) => {
 	//开发环境下的错误显示
-	res.status(err.statusCode).json({
-		status: err.status,
-		error: err,
-		message: err.message,
-		stack: err.stack
+	//api接口的错误处理
+	if (req.originalUrl.startsWith('/api')) {
+		return res.status(err.statusCode).json({
+			status: err.status,
+			error: err,
+			message: err.message,
+			stack: err.stack
+		});
+	}
+	//页面的错误处理 渲染一个错误页面
+	console.error('Error:🎆 ', err);
+	return res.status(err.statusCode).render('error', {
+		title: 'Something went wrong',
+		message: err.message
 	});
 };
 //标准的错误处理
-const sendErrorProd = (err, res) => {
-	//生产环境下的错误显示
-	if (err.isOperational) {
-		res.status(err.statusCode).json({
-			status: err.status,
-			message: err.message
-		});
-	} else {
-		console.error('Error:', err);
-		res.status(500).json({
+const sendErrorProd = (err, req, res) => {
+	//api接口的错误处理
+	if (req.originalUrl.startsWith('/api')) {
+		//生产环境下的错误显示
+		if (err.isOperational) {
+			return res.status(err.statusCode).json({
+				status: err.status,
+				message: err.message
+			});
+		}
+		console.error('Error:🎆 ', err);
+		return res.status(500).json({
 			status: 'error',
 			message: 'Something was wrong!'
 		});
 	}
-
+	//页面的错误处理 渲染一个错误页面
+	if (err.isOperational) {
+		return res.status(err.statusCode).render('error', {
+			title: 'Something went wrong',
+			message: err.message
+		});
+	}
+	console.error('Error:🎆 ', err);
+	return res.status(err.statusCode).render('error', {
+		title: 'Something went wrong',
+		message: 'Please try again later'
+	});
 };
 
 module.exports = (err, req, res, next) => {
@@ -58,7 +80,7 @@ module.exports = (err, req, res, next) => {
 	// console.log(process.env.NODE_ENV === 'development');
 
 	if (process.env.NODE_ENV === 'development') {
-		sendErrorDev(err, res);
+		sendErrorDev(err, req, res);
 	} else if (process.env.NODE_ENV === 'production') {
 		// console.log(process.env.NODE_ENV);
 		let error = err;
@@ -80,6 +102,6 @@ module.exports = (err, req, res, next) => {
 		if (error.name === 'TokenExpiredError') {
 			error = handleJWTExpiredError();
 		}
-		sendErrorProd(error, res);
+		sendErrorProd(error, req, res);
 	}
 };
