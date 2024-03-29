@@ -3,7 +3,6 @@
 const login = async(email, password) => {
 	console.log(email, password);
 	try{
-		console.log('trying to login');
 		const res = await axios({
 			method: 'POST',
 			url: 'http://127.0.0.1:3000/api/v1/users/login',
@@ -12,10 +11,14 @@ const login = async(email, password) => {
 				password
 			}
 		})
-		console.log(res);
+		if(res.data.status ==='success'){
+			alert('Login Successfull');
+			window.setTimeout(() => {
+				window.location.href = '/';
+			}, 1000);
+		}
 	}catch(error){
-		console.log(error.response.data);
-		console.log('Error');
+		alert(error.response.data.message);
 	}
 };
 document.querySelector('.form').addEventListener('submit', e =>{
