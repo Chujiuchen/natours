@@ -2,8 +2,8 @@ import '@babel/polyfill';
 import { login, logout } from './login';
 //判断是否有这个元素
 const mapBox = document.getElementById('map');
-const loginForm = document.querySelector('.form');
-const loginBtn = document.querySelector('.nav__el--logout');
+const loginForm = document.querySelector('.form--login');
+const logOutBtn = document.querySelector('.nav__el--logout');
 
 //进行数据判断
 if (mapBox) {
@@ -18,8 +18,8 @@ if (loginForm) {
 		login(email, password);
 	});
 }
-if (loginBtn) {
-	loginBtn.addEventListener('click', () => {
+if (logOutBtn) {
+	logOutBtn.addEventListener('click', () => {
 		logout();
 	});
 }

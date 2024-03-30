@@ -39,10 +39,12 @@ app.use('/api', limiter);
 if (process.env.NODE_ENV === 'development') {
 	app.use(morgan('dev'));
 }
-
+//express.json 能解析json数据并进行限制
 app.use(express.json({
 	limit: '10kb'
 }));
+//express.urlencoded 能解析表单提交的编码数据进行限制
+app.use(express.urlencoded({ extended: true, limit: '10kb' }));
 
 app.use(coookieParser());
 
@@ -55,17 +57,17 @@ app.use(hpp({
 	whitelist: ['ratingsAverage', 'ratingsQuantity', 'duration', 'maxGroupSize', 'difficulty', 'price']
 }));
 
-app.use((req, res, next)=>{
+app.use((req, res, next) => {
 	req.requestTime = new Date().toISOString();
 	// console.log(req.cookies)
 	next();
-})
+});
 
 //express能读取到public文件中的所有文件
 app.use(express.static(path.join(__dirname, 'public')));
 
 //4个url
-app.use('/',viewRouter)
+app.use('/', viewRouter);
 app.use('/api/v1/tours', tourRouter);
 app.use('/api/v1/users', userRouter);
 app.use('/api/v1/reviews', reviewRouter);
