@@ -16,7 +16,7 @@ export const login = async (email, password) => {
 			showAlert('success', 'Login Successfully!');
 			window.setTimeout(() => {
 				window.location.href = '/';
-			}, 1000);
+			}, 3000);
 		}
 	} catch (error) {
 		showAlert('error', error.response.data.message);
