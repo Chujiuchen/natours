@@ -3,13 +3,14 @@ const router = express.Router();
 const viewsController = require('../controller/viewsController');
 const authController = require('../controller/authController');
 
-router.use(authController.isLoggedIn);
 
 // Route to get the overview page
-router.get('/', viewsController.getOverview);
+router.get('/', authController.isLoggedIn, viewsController.getOverview);
 // Route to get the tour page
-router.get('/tour/:slug', viewsController.getTour);
+router.get('/tour/:slug', authController.isLoggedIn, viewsController.getTour);
 
-router.get('/login',viewsController.getLoginFrom);
+router.get('/login', authController.isLoggedIn, viewsController.getLoginFrom);
+
+router.get('/me', authController.protect, viewsController.getAccount);
 
 module.exports = router;
