@@ -5,8 +5,8 @@ const mongoose = require('mongoose');
 const port = process.env.PORT;
 
 
-// const DB = process.env.DATABASE.replace('<PASSWORD>', process.env.DATABASE_PASSWORD);
-const DB = process.env.DATABASE_LOCAL;
+const DB = process.env.DATABASE.replace('<PASSWORD>', process.env.DATABASE_PASSWORD);
+// const DB = process.env.DATABASE_LOCAL;
 // console.log(DB);
 
 mongoose.connect(DB, {
