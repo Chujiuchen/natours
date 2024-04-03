@@ -1,19 +1,21 @@
 const multer = require('multer');
+const sharp = require('sharp');
 const User = require('../models/userModel');
 const AppError = require('../utils/appError');
 const catchAsync = require('./../utils/catchAsync');
 const factory = require('./handlerFactory');
 
 // 设置 multer 存储配置，指定上传文件的目标路径和文件名
-const multerStorage = multer.diskStorage({
-	destination: (req, file, cb) => {
-		cb(null, 'public/img/users'); // 将上传文件存储到指定目录
-	},
-	filename: (req, file, cb) => {
-		const ext = file.mimetype.split('/')[1]; // 获取文件扩展名
-		cb(null, `user-${req.user.id}-${Date.now()}.${ext}`); // 设置文件名格式
-	},
-});
+// const multerStorage = multer.diskStorage({
+// 	destination: (req, file, cb) => {
+// 		cb(null, 'public/img/users'); // 将上传文件存储到指定目录
+// 	},
+// 	filename: (req, file, cb) => {
+// 		const ext = file.mimetype.split('/')[1]; // 获取文件扩展名
+// 		cb(null, `user-${req.user.id}-${Date.now()}.${ext}`); // 设置文件名格式
+// 	},
+// });
+const multerStorage = multer.memoryStorage();
 
 // 设置 multer 文件过滤器，检查文件类型是否为图像
 const multerFilter = (req, file, cb) => {
@@ -31,6 +33,22 @@ const upload = multer({
 });
 
 exports.uploadUserPhoto = upload.single('photo');
+
+// Resize user's photo if a file is uploaded, then store the resized image on the server
+exports.resizeUserPhoto = (req, res, next) => {
+ if (!req.file) return next(); // If no file is uploaded, skip to the next middleware
+
+ // Append unique filename and format to the uploaded image
+ req.file.filename = `user-${req.user.id}-${Date.now()}.jpeg`;
+
+ // Use sharp to resize, convert, and save the image
+ sharp(req.file.buffer)
+  .resize(500, 500)
+  .toFormat('jpeg')
+  .jpeg({ quality: 90 })
+  .toFile(`public/img/users/${req.file.filename}`);
+ next(); // Call the next middleware
+}
 
 const filterObj = (obj, ...allowedFields) => {
 	const newObj = {};

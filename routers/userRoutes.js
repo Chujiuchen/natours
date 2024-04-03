@@ -17,7 +17,7 @@ router.route('/updateMyPassword').patch(authController.updatePassword);
 router.route('/me').get(userController.getMe, userController.getUser); //通过getMe函数获取当前用户信息 然后在getUser函数中获取详细信息
 router
 	.route('/updateMe')
-	.patch(userController.uploadUserPhoto, userController.updataMe);
+	.patch(userController.uploadUserPhoto, userController.resizeUserPhoto, userController.updataMe);
 router.route('/deleteMe').delete(userController.deleteMe);
 
 //admin才能访问的路由
