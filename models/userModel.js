@@ -6,36 +6,37 @@ const bcrypt = require('bcryptjs');
 const userSchema = mongoose.Schema({
 	name: {
 		type: String,
-		required: [true, 'Please tell us your name!']
+		required: [true, 'Please tell us your name!'],
 	},
 	email: {
 		type: String,
 		required: [true, 'Please tell us your email!'],
 		unique: true,
 		lowercase: true,
-		validate: [validator.isEmail, 'Please provide a valid email!']
+		validate: [validator.isEmail, 'Please provide a valid email!'],
 	},
-	photo: String,
+	photo: { type: String, default: 'default.jpg' },
+
 	role: {
 		type: String,
 		enum: ['user', 'guide', 'lead-guide', 'admin'],
-		default: 'user'
+		default: 'user',
 	},
 	password: {
 		type: String,
 		required: [true, 'Please provide a password!'],
 		minlength: 8,
-		select: false
+		select: false,
 	},
 	passwordConfirm: {
 		type: String,
 		required: [true, 'Please confirm your password!'],
 		validate: {
-			validator: function(el) {
+			validator: function (el) {
 				return el === this.password;
 			},
-			message: 'Password are not same!'
-		}
+			message: 'Password are not same!',
+		},
 	},
 	passwordChangeAt: Date,
 	passwordResetToken: String,
@@ -43,12 +44,12 @@ const userSchema = mongoose.Schema({
 	active: {
 		type: Boolean,
 		select: false,
-		default: true
-	}
+		default: true,
+	},
 });
 
 //保存数据前自动执行的代码
-userSchema.pre('save', async function(next) {
+userSchema.pre('save', async function (next) {
 	// console.log(123123);
 	if (!this.isModified('password')) return next();
 	//通过bcryptjs加密字符串
@@ -58,7 +59,7 @@ userSchema.pre('save', async function(next) {
 });
 
 //保存数据前自动执行的代码 添加用户修改密码的时间
-userSchema.pre('save', async function(next) {
+userSchema.pre('save', async function (next) {
 	//如果 没修改了密码 或者新创建的就 next跳过
 	if (!this.isModified('password') || this.isNew) return next();
 	//否则就创建时间到passwordChangeAT
@@ -67,38 +68,43 @@ userSchema.pre('save', async function(next) {
 });
 
 //查询数据前执行
-userSchema.pre(/^find/, async function(next) {
+userSchema.pre(/^find/, async function (next) {
 	//把活跃标记隐藏 是false的用户全部隐藏
 	this.find({ active: { $ne: false } });
 	next();
 });
 
 //验证密码是否正确的bcrypt函数
-userSchema.methods.correctPassword = function(candidaPassword, userPassword) {
+userSchema.methods.correctPassword = function (candidaPassword, userPassword) {
 	return bcrypt.compare(candidaPassword, userPassword);
 };
 
 //判断是否有修改密码 如果有修改 passwordChangeAt参数就会有数据
-userSchema.methods.changedPasswordAfter = function(JWTTimestamp) {
+userSchema.methods.changedPasswordAfter = function (JWTTimestamp) {
 	if (this.passwordChangeAt) {
-		const changedTimestamp = parseInt(this.passwordChangeAt.getTime() / 1000, 10);
+		const changedTimestamp = parseInt(
+			this.passwordChangeAt.getTime() / 1000,
+			10
+		);
 		return JWTTimestamp < changedTimestamp;
 	}
 	return false;
 };
 
 //创建忘记密码和充值密码的 token
-userSchema.methods.createPasswordResetToken = function() {
+userSchema.methods.createPasswordResetToken = function () {
 	//创建一个随机的字符串
 	const resetToken = crypto.randomBytes(32).toString('hex');
 	//创建忘记密码的token 加密token
-	this.passwordResetToken = crypto.createHash('sha256').update(resetToken).digest('hex');
+	this.passwordResetToken = crypto
+		.createHash('sha256')
+		.update(resetToken)
+		.digest('hex');
 	console.log({ resetToken }, this.passwordResetToken);
 	//创建时效 10分钟
 	this.passwordResetExpires = Date.now() + 10 * 60 * 1000;
 	return resetToken;
 };
-
 
 const User = mongoose.model('User', userSchema);
 module.exports = User;

@@ -51,8 +51,6 @@ exports.getMe = catchAsync(async (req, res, next) => {
 //更新用户的信息
 exports.updataMe = catchAsync(async (req, res, next) => {
 	// console.log(111)
-	console.log(req.file);
-	console.log(req.body);
 	//安全判断 如果包含密码直接弹个错误
 	if (req.body.password || req.body.passwordConfirm) {
 		return next(
@@ -65,6 +63,11 @@ exports.updataMe = catchAsync(async (req, res, next) => {
 
 	//验证只允许更新的字段
 	const filteredBody = filterObj(req.body, 'name', 'email');
+	// 如果 req 对象中存在 file 属性
+	if (req.file) {
+		// 则将 filteredBody 对象中的 photo 属性设置为 req 对象中 file 属性的文件名
+		filteredBody.photo = req.file.filename;
+	}
 	// console.log(filteredBody);
 	//更新用户数据 避免创建的验证信息 用findByIdAndUpdate(id,运行更新的字段,设置)
 	const updateUser = await User.findByIdAndUpdate(req.user.id, filteredBody, {
