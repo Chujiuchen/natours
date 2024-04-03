@@ -28,9 +28,12 @@ if (logOutBtn) {
 if (updateUser) {
 	updateUser.addEventListener('submit', e => {
 		e.preventDefault();//阻止默认提交
-		const name = document.getElementById('name').value;//获取输入框的name值
-		const email = document.getElementById('email').value;//获取输入框的email值
-		updateSettings({ name, email }, 'data');//调用更新函数
+		const form = new FormData();
+		form.append('name', document.getElementById('name').value);//获取输入框的name值
+		form.append('email', document.getElementById('email').value);//获取输入框的email值
+		form.append('photo', document.getElementById('photo').files[0]);//获取输入框的photo值
+
+		updateSettings(form, 'data');//调用更新函数
 	});
 }
 if (updateUserPassword) {

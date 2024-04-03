@@ -14,9 +14,9 @@ export const updateSettings = async (data, type) => {
 		if (res.data.status === 'success') {
 			const message = type === 'password'? 'Password updated successfully!Please login again' : 'User settings updated successfully';
 			showAlert('success', message);
-			const type = 'password'? '/login' : '/me';
+			const url = type === 'password'? '/login' : '/me';
 			window.setTimeout(() => {
-				window.location.href = type;
+				window.location.href = url;
 			}, 2000);
 		}
 	} catch (error) {
