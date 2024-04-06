@@ -35,20 +35,20 @@ const upload = multer({
 exports.uploadUserPhoto = upload.single('photo');
 
 // Resize user's photo if a file is uploaded, then store the resized image on the server
-exports.resizeUserPhoto = (req, res, next) => {
+exports.resizeUserPhoto = catchAsync( async (req, res, next) => {
  if (!req.file) return next(); // If no file is uploaded, skip to the next middleware
 
  // Append unique filename and format to the uploaded image
  req.file.filename = `user-${req.user.id}-${Date.now()}.jpeg`;
 
  // Use sharp to resize, convert, and save the image
- sharp(req.file.buffer)
+ await sharp(req.file.buffer)
   .resize(500, 500)
   .toFormat('jpeg')
   .jpeg({ quality: 90 })
   .toFile(`public/img/users/${req.file.filename}`);
  next(); // Call the next middleware
-}
+});
 
 const filterObj = (obj, ...allowedFields) => {
 	const newObj = {};

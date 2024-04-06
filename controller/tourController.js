@@ -1,8 +1,66 @@
+const multer = require('multer');
+const sharp = require('sharp');
 const Tour = require('./../models/tourModel');
 // const APIFeatures = require('./../utils/apiFeatures');
 const catchAsync = require('./../utils/catchAsync');
 // const AppError = require('./../utils/appError');
 const factory = require('./handlerFactory');
+const AppError = require('../utils/appError');
+
+
+const multerStorage = multer.memoryStorage();
+
+// 设置 multer 文件过滤器，检查文件类型是否为图像
+const multerFilter = (req, file, cb) => {
+	if (file.mimetype.startsWith('image')) {
+		cb(null, true); // 符合条件，允许上传
+	} else {
+		cb(new AppError('Please upload an image file', 400), false); // 不符合条件，返回错误信息
+	}
+};
+
+// 创建 upload 对象，应用存储配置和文件过滤器
+const upload = multer({
+	storage: multerStorage,
+	fileFilter: multerFilter
+});
+
+exports.uploadTourImages = upload.fields([
+	//限制上传图片的数量 imageCover为1  images为3
+	{ name: 'imageCover', maxCount: 1 },
+	{ name: 'images', maxCount: 3 }
+]);
+
+exports.resizeTourImages = catchAsync(async (req, res, next) => {
+	// console.log(req.files);
+	// 如果没有上传封面图片和其他图片，则直接执行下一个中间件
+	if (!req.files.imageCover && !req.files.images) {
+		return next();
+	}
+	// 处理Cover图片
+	// 设置封面图片文件名并调整尺寸、格式和质量后保存
+	req.body.imageCover = `tour-${req.params.id}-${Date.now()}-cover.jpeg`;
+	await sharp(req.files.imageCover[0].buffer)
+		.resize(2000, 1333)
+		.toFormat('jpeg')
+		.jpeg({ quality: 90 })
+		.toFile(`public/img/tours/${req.body.imageCover}`);
+
+	// 处理其他图片
+	// 遍历处理每张其他图片，设置文件名并调整尺寸、格式和质量后保存，然后将文件名添加至req.body.images数组
+	req.body.images = [];
+	await Promise.all(req.files.images.map(async (file, i) => {
+		const filename = `tour-${req.params.id}-${Date.now()}-${i + 1}.jpeg`;
+		await sharp(file.buffer)
+			.resize(2000, 1333)
+			.toFormat('jpeg')
+			.jpeg({ quality: 90 })
+			.toFile(`public/img/tours/${filename}`);
+		req.body.images.push(filename);
+	}));
+	next();
+});
+
 
 //展示前五的旅游数据
 exports.aliasTopTours = (req, res, next) => {
