@@ -2,7 +2,7 @@ const User = require('./../models/userModel');
 const { promisify } = require('util');
 const catchAsync = require('./../utils/catchAsync');
 const jwt = require('jsonwebtoken');
-const sendEmail = require('./../utils/email.js');
+const Email = require('./../utils/email.js');
 const AppError = require('./../utils/appError');
 const crypto = require('crypto');
 
@@ -43,6 +43,9 @@ exports.signup = catchAsync(async (req, res, next) => {
 		passwordConfirm: req.body.passwordConfirm,
 		role: req.body.role
 	});
+
+	const url = `${req.protocol}://127.0.0.1:3000/me`;
+	await new Email(newUser,url).sendWelcome();
 	// console.log(newUser);
 
 	//create jwt token
@@ -182,11 +185,11 @@ exports.forgotPassword = catchAsync(async (req, res, next) => {
 	const message = `Forgot your password? Submit a PATCH request with your new password and passwordConfirm to: ${resetURL}.\nIf you didn't forget your password, please ignore this email!`;
 	try {
 		//调用发送邮件的中间件
-		await sendEmail({
-			email: user.email,//当前用户的邮箱
-			subject: 'You password reset token (valid 10 min)',
-			message//提示信息 和 集合了token的url
-		});
+		// await sendEmail({
+		// 	email: user.email,//当前用户的邮箱
+		// 	subject: 'You password reset token (valid 10 min)',
+		// 	message//提示信息 和 集合了token的url
+		// });
 		res.status(200).json({
 			status: 'success',
 			message: 'Token send to email!'
