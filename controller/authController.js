@@ -179,17 +179,14 @@ exports.forgotPassword = catchAsync(async (req, res, next) => {
 	const resetToken = user.createPasswordResetToken();
 	//保存到数据库中 加密了的token保存到数据库
 	await user.save({ validateBeforeSave: false });
-	//发送邮件 把未加密的token发送到客户端
-	const resetURL = `${req.protocol}://${req.get('host')}/api/v1/users/resetPassword/${resetToken}`;//整合个充值密码的url
-	//  http://localhost:3000/api/v1/users/resetPassword/68f33affc4747b44df7e0aaf5e1715918ffd8592d4be288205d7bd42a46dc61f.
-	const message = `Forgot your password? Submit a PATCH request with your new password and passwordConfirm to: ${resetURL}.\nIf you didn't forget your password, please ignore this email!`;
+	// const message = `Forgot your password? Submit a PATCH request with your new password and passwordConfirm to: ${resetURL}.\nIf you didn't forget your password, please ignore this email!`;
 	try {
+		//发送邮件 把未加密的token发送到客户端
+		const resetURL = `${req.protocol}://127.0.0.1:3000/api/v1/users/resetPassword/${resetToken}`;//整合个充值密码的url
+		//  http://127.0.0.1:3000/api/v1/users/resetPassword/68f33affc4747b44df7e0aaf5e1715918ffd8592d4be288205d7bd42a46dc61f.
 		//调用发送邮件的中间件
-		// await sendEmail({
-		// 	email: user.email,//当前用户的邮箱
-		// 	subject: 'You password reset token (valid 10 min)',
-		// 	message//提示信息 和 集合了token的url
-		// });
+		await new Email(user, resetURL).sendPasswordReset();
+
 		res.status(200).json({
 			status: 'success',
 			message: 'Token send to email!'

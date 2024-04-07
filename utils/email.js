@@ -56,4 +56,7 @@ module.exports = class Email {
 		await this.send('welcome', 'Welcome to Natours Family!'); // 调用send方法发送欢迎邮件
 	}
 
+	async sendPasswordReset() {
+		await this.send('passwordReset', 'Your password reset link (valid for 10 minutes)!'); // 调用send方法发送密码重置邮件
+	}
 };
