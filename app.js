@@ -15,6 +15,7 @@ const tourRouter = require('./routers/tourRoutes');
 const userRouter = require('./routers/userRoutes');
 const reviewRouter = require('./routers/reviewRoutes');
 const viewRouter = require('./routers/viewRoutes');
+const bookingRouter = require('./routers/bookingRoutes');
 
 const app = express();
 
@@ -71,6 +72,7 @@ app.use('/', viewRouter);
 app.use('/api/v1/tours', tourRouter);
 app.use('/api/v1/users', userRouter);
 app.use('/api/v1/reviews', reviewRouter);
+app.use('/api/v1/booking', bookingRouter);
 
 //不是指定的路由 就提示404
 app.all('*', (req, res, next) => {
